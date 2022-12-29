@@ -1,3 +1,5 @@
+The problem Link https://codeforces.com/contest/180/problem/B
+
 If you do not know where divisibility rules came from, then take a tour at this website (https://brilliant.org/wiki/proof-of-divisibility-rules) it demonstrates the proof of the divisibility rules from 2 to 13. Recommended to understand these proofs well before continue reading the rest of the article.
 
 So, what is the problem? In shortly we got 2 numbers a base and divisor both given in the base 10. we want to determine the divisibility type of this divisor in the given base.
