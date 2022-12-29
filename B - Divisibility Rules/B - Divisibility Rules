@@ -1,0 +1,112 @@
+If you do not know where divisibility rules came from, then take a tour at this website (https://brilliant.org/wiki/proof-of-divisibility-rules) it demonstrates the proof of the divisibility rules from 2 to 13. Recommended to understand these proofs well before continue reading the rest of the article.
+
+So, what is the problem? In shortly we got 2 numbers a base and divisor both given in the base 10. we want to determine the divisibility type of this divisor in the given base.
+
+The divisibility types are 2-type, 3-type, 11-type, 6-type, and 7-type.
+
+- b stands for base, and d stands for divisor
+
+Lets check each type in its own:
+
+For 2-type:
+	given this equation: (b^n) % d = 0, find the least integer n that satisfy this equation. if such n is exist then it means that the divisor is 2-type, and need to check only for the first n digits of a number (in the given base), if first n digits are divisible by the divisor then the whole number is also divisible by the divisor.
+
+	we can find n by using loop or gcd, I will explain the gcd way as it is best especially for large numbers.
+	The code in C++
+		int n=1, m;
+		while((m=__gcd(b, d))>1){
+			d/=m;
+			n++;
+		}
+		cout<<n<<endl;
+
+	So, the code is just factorizing the d for b. Ex) let b=15, d=75. we can express d as d=15*5 that means n=2, lets check in equation (15^2)%75=0 and thats true, but why? lets take a deep look into it. (15^2)%75 = (15*15)%(15*5) = 0.
+	that means n equals the number of factors of the d for b. Thats enough for 2-type, lets move to next.
+
+For 3-type:
+	if (b-1)%d == 0, then the divisor is 3-type. thats it ;) .
+
+For 11-type:
+	if (b+1)%d == 0, then the divisor is 11-type.
+
+Check each one of them is easy, the problem arises when the divisor is multi-type. So, we could not check each type on its own.
+There is 2 things we must do. 
+- First, extract the factors of the type from the divisor before moving to check the next type. So, what are the factors of each type?. for 2-type is b, for 3-type is b-1, and for 11-type is n+1. we check if the divisor have that type then extract it from the divisor.
+- Secondly, we must ensure that the types are coprimes of each other, as you could not check if a number is divisible by 2 numbers that have a common factor greater than 1 without divide the number by one of them first then check for second.
+Ex) 40%(4*5)=0 as 40%4=0, 40%5=0, and 4,5 are coprime numbers. but, 16%(8*4) not equals 0, even 16%8=0 and 16%4=0 as 8,4 have a common factor greater than 1 which is 4.
+Hopefully 2-type, 3-type, and 11-type are coprimes of each other if base is even. For odd base, the 3-type and 11-type have a common factor which is (2).
+
+Let's start solving:
+	1- check for 2-type first by using loop or gcd way. gcd way extract 2-type factors from the divisor. If you want use loop way, then make sure to extract 2-type factors from the divisor.
+
+	2- check for 3-type. m=gcd(b-1, d), m is the 3-type factor that hidden in the divisor. if m>2, then extract from the divisor d=d/m. But, why check if m greater than 2 not 1? as if the base is even then obviously the m greater than 2. but, if the base is odd then m could be 2. And it should not extract if m equal to 2 as maybe it is a factor of 11-type.
+
+	* if gcd(b-1, d) equals 2, then it belongs to 3 if and only if the divisor does not have any 11-type factors.
+	* if m equals 2, it could be 3-type as b%2==1 or could be 11-type as b%2==(1-2=-1). so, we will consider it for 3-type.
+
+	3- check for 11-type. m=gcd(b+1, d), m is the 11-type factor that hidden in the divisor. if m>2, then extract from the divisor d=d/m. if m is 2, then it is 3-type factor.
+
+	4- if check 3-type and 11-type both fails and base is odd and divisor is even, then m equals 2 and it belongs to 3-type.
+
+	5- if divisor==1, print it's type based on the above results, otherwise it is 7-type.
+
+The code in C++
+
+void solve(){
+  int b,d, m;
+  cin>>b>>d;
+ 
+  ll n=0;
+  while((m=__gcd(b, d))>1){
+    n++;
+    d /= m;
+  }
+  bool b3=0, b11=0;
+ 
+  m = __gcd(b-1, d);
+  if(m>2){
+    d /= m;
+    b3 = 1;
+  }
+  m = __gcd(b+1, d);
+  if(m>2){
+    d /= m;
+    b11 = 1;
+  }
+  if(!b3 && !b11 && d%2==0 && b%2==1){
+    d/=2;
+    b3=1;
+  }
+  if(d!=1) cout<<"7-type"<<endl;
+  else if(n!=0 && (b3 || b11)) cout<<"6-type"<<endl;
+  else if(b3 && b11) cout<<"6-type"<<endl;
+  else if(b3) cout<<"3-type"<<endl;
+  else if(b11) cout<<"11-type"<<endl;
+  else if(n!=0) cout<<"2-type"<<endl<<n<<endl;
+}
+
+More beatiful code:
+
+void solve(){
+  int b,d, c=0, m;
+  cin>>b>>d;
+ 
+  while((m=__gcd(b, d))>1){
+    c++;
+    d /= m;
+  }
+  if(d==1) cout<<"2-type"<<endl<<c<<endl;
+  else if(c==0 && (b-1)%d==0) cout<<"3-type"<<endl;
+  else if(c==0 && (b+1)%d == 0) cout<<"11-type"<<endl;
+  else if((b-1)*(b+1)/(b%2+1) % d == 0) cout<<"6-type"<<endl;
+  else cout<<"7-type"<<endl;
+}
+
+explain the code:
+1- extract 2-type factors
+2- if the divisor==1 that means it consist of 2-type factors only
+3- otherwise, if c==0 (check if the divisor does not include 2-type), then check for 3-type
+4- otherwise, if c==0 (check if the divisor does not include 2-type), then check for 11-type
+* if the divisor includes both 3-type, and 11-type, then each test of them would fail alone.
+5- check for both 3-type, 11-type together by multiply 3-type factor, and 11-type factor -> (b-1)*(b+1) and divide by 2 if base is odd as 2 should belong only to one factor either 3-type or 11-type
+6- if all test fails, then it's 7-type
